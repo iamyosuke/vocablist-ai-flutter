@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/word.dart';
-import '../models/memory_bank.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -10,7 +9,6 @@ class DatabaseService {
 
   DatabaseService._internal();
 
-  // Word関連のメソッド
   Future<int> insertWord(Word word) async {
     final response = await _supabase.from('words').insert({
       'word': word.word,
@@ -61,40 +59,5 @@ class DatabaseService {
         .from('words')
         .delete()
         .eq('id', id);
-  }
-
-  // MemoryBank関連のメソッド
-  Future<int> insertMemoryBank(MemoryBank memoryBank) async {
-    final response = await _supabase.from('memory_banks').insert({
-      'word_id': memoryBank.wordId,
-      'level': memoryBank.level,
-      'next_review_date': memoryBank.nextReviewDate.toIso8601String(),
-      'last_review_date': memoryBank.lastReviewDate.toIso8601String(),
-      'is_active': memoryBank.isActive,
-    }).select();
-
-    return response[0]['id'] as int;
-  }
-
-  Future<List<MemoryBank>> getMemoryBanks() async {
-    final response = await _supabase
-        .from('memory_banks')
-        .select()
-        .eq('is_active', true)
-        .order('next_review_date', ascending: true);
-
-    return response.map((data) => MemoryBank.fromMap(data)).toList();
-  }
-
-  Future<void> updateMemoryBank(MemoryBank memoryBank) async {
-    await _supabase
-        .from('memory_banks')
-        .update({
-          'level': memoryBank.level,
-          'next_review_date': memoryBank.nextReviewDate.toIso8601String(),
-          'last_review_date': memoryBank.lastReviewDate.toIso8601String(),
-          'is_active': memoryBank.isActive,
-        })
-        .eq('id', memoryBank.id);
   }
 }

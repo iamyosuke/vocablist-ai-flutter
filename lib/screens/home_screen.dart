@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/word.dart';
 import '../services/database_service.dart';
 import '../widgets/vocabulary_list.dart';
 import '../widgets/word_detail.dart';
 import '../widgets/add_word_dialog.dart';
-import '../providers/memory_bank_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,26 +20,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    try {
-      await _loadWords();
-      final memoryBankProvider = context.read<MemoryBankProvider>();
-      await memoryBankProvider.initializeMemoryBank();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('初期化に失敗しました')),
-      );
-    }
+    _loadWords();
   }
 
   Future<void> _loadWords() async {
     try {
       final words = await _databaseService.getWords();
-      if (!mounted) return;
       setState(() {
         _words = words;
         _isLoading = false;
@@ -59,11 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final id = await _databaseService.insertWord(word);
       final newWord = word.copyWith(id: id);
-      
-      // メモリバンクに追加
-      final memoryBankProvider = context.read<MemoryBankProvider>();
-      await memoryBankProvider.addToMemoryBank(id);
-
       setState(() {
         _words.insert(0, newWord);
       });
@@ -116,25 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Vocablist AI'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          // 復習が必要な単語の数を表示
-          Consumer<MemoryBankProvider>(
-            builder: (context, provider, child) {
-              final reviewCount = provider.getTodayReviews().length;
-              return reviewCount > 0
-                  ? Badge(
-                      label: Text('$reviewCount'),
-                      child: IconButton(
-                        icon: const Icon(Icons.timer),
-                        onPressed: () {
-                          // TODO: 復習画面に遷移
-                        },
-                      ),
-                    )
-                  : const SizedBox.shrink();
-            },
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
