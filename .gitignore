@@ -1,0 +1,35 @@
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Pods/
+ios/Runner.xcworkspace/
+android/.gradle/
+android/app/build/
+android/app/intermediates/
+android/app/outputs/
+android/app/src/debug/
+android/app/src/profile/
+android/local.properties
+android/.idea/
+*.iml
+
+# VS Code settings
+.vscode/
+
+# IntelliJ IDEA settings
+.idea/
+*.iml
+
+# MacOS specific
+.DS_Store
+
+# Other
+*.log
+*.lock
