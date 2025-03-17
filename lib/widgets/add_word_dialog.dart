@@ -77,47 +77,92 @@ ${_wordController.text}の基本的な意味
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('新しい単語を追加'),
-      content: SingleChildScrollView(
+    return Dialog(
+      child: Container(
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Add Word',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _wordController,
-              decoration: const InputDecoration(
-                labelText: '単語',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: 'Enter word',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.deepPurple),
+                  onPressed: _generateMeaning,
+                ),
               ),
-              onEditingComplete: _generateMeaning,
             ),
             const SizedBox(height: 16),
             if (_isGenerating)
-              const CircularProgressIndicator()
+              const Center(child: CircularProgressIndicator())
             else
-              ElevatedButton(
-                onPressed: _generateMeaning,
-                child: const Text('意味を生成'),
+              TextField(
+                controller: _meaningController,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  hintText: 'Enter meaning',
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _meaningController,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                labelText: '意味',
-                border: OutlineInputBorder(),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _addWord,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Save'),
+                ),
+              ],
             ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
-        ),
-        ElevatedButton(onPressed: _addWord, child: const Text('追加')),
-      ],
     );
   }
 }

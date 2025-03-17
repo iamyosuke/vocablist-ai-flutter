@@ -15,12 +15,32 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final DatabaseService _databaseService = DatabaseService();
   List<Word> _words = [];
+  List<Word> _filteredWords = [];
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadWords();
+    _searchController.addListener(_filterWords);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterWords() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredWords =
+          _words.where((word) {
+            return word.word.toLowerCase().contains(query) ||
+                word.meaning.toLowerCase().contains(query);
+          }).toList();
+    });
   }
 
   Future<void> _loadWords() async {
@@ -33,9 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('単語の読み込みに失敗しました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('単語の読み込みに失敗しました')));
     }
   }
 
@@ -48,9 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('単語の追加に失敗しました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('単語の追加に失敗しました')));
     }
   }
 
@@ -65,19 +85,16 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('単語の更新に失敗しました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('単語の更新に失敗しました')));
     }
   }
 
   void _showWordDetail(Word word) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => WordDetail(
-          word: word,
-          onWordUpdate: _updateWord,
-        ),
+        builder: (context) => WordDetail(word: word, onWordUpdate: _updateWord),
       ),
     );
   }
@@ -93,18 +110,52 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vocablist AI'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text(
+          'Vocablist AI',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : VocabularyList(
-              words: _words,
-              onWordTap: _showWordDetail,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search words...',
+                prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
             ),
+          ),
+          Expanded(
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : VocabularyList(
+                      words:
+                          _searchController.text.isEmpty
+                              ? _words
+                              : _filteredWords,
+                      onWordTap: _showWordDetail,
+                    ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddWordDialog,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

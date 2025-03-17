@@ -7,11 +7,7 @@ class WordDetail extends StatefulWidget {
   final Word word;
   final Function(Word) onWordUpdate;
 
-  const WordDetail({
-    super.key,
-    required this.word,
-    required this.onWordUpdate,
-  });
+  const WordDetail({super.key, required this.word, required this.onWordUpdate});
 
   @override
   State<WordDetail> createState() => _WordDetailState();
@@ -42,9 +38,9 @@ class _WordDetailState extends State<WordDetail> {
       // Note: 実際のTTS実装はプラットフォームに応じて異なります
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('音声の再生に失敗しました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('音声の再生に失敗しました')));
     }
   }
 
@@ -66,52 +62,115 @@ class _WordDetailState extends State<WordDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.word.word),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.deepPurple),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            icon: Icon(
+              _isEditing ? Icons.save : Icons.edit,
+              color: Colors.deepPurple,
+            ),
             onPressed: _toggleEdit,
           ),
         ],
       ),
+      backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  widget.word.word,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.volume_up),
-                  onPressed: _speakWord,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_isEditing)
-              TextField(
-                controller: _meaningController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '意味',
-                ),
-              )
-            else
-              MarkdownBody(data: widget.word.meaning),
-            const SizedBox(height: 16),
-            Text(
-              '作成日: ${widget.word.createdAt.toLocal()}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              '更新日: ${widget.word.updatedAt.toLocal()}',
-              style: Theme.of(context).textTheme.bodySmall,
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.word.word,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.volume_up,
+                              color: Colors.deepPurple,
+                            ),
+                            onPressed: _speakWord,
+                          ),
+                          if (!_isEditing)
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                // TODO: 削除機能の実装
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (_isEditing)
+                    TextField(
+                      controller: _meaningController,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: 'Enter meaning',
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    )
+                  else
+                    MarkdownBody(
+                      data: widget.word.meaning,
+                      styleSheet: MarkdownStyleSheet(
+                        h1: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                        p: const TextStyle(fontSize: 16, height: 1.5),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '作成日: ${widget.word.createdAt.toLocal()}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '更新日: ${widget.word.updatedAt.toLocal()}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
